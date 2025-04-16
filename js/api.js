@@ -1,35 +1,69 @@
 const api = {
-    async getColleges() {
-        try {
-            const response = await fetch('../data/college.json');
-            if (!response.ok) throw new Error('Failed to load colleges');
-            return await response.json();
-        } catch (error) {
-            console.error('Error loading colleges:', error);
-            return [];
-        }
+    getColleges() {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', '../data/college.json', true);
+            xhr.onload = function() {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+                        resolve(data);
+                    } catch (error) {
+                        console.error('Error parsing college data:', error);
+                        resolve([]);
+                    }
+                } else {
+                    console.error('Failed to load colleges');
+                    resolve([]);
+                }
+            };
+            xhr.onerror = function() {
+                console.error('Error loading colleges');
+                resolve([]);
+            };
+            xhr.send();
+        });
     },
 
-    async getUsers() {
-        try {
-            const response = await fetch('../data/user.json');
-            if (!response.ok) throw new Error('Failed to load users');
-            return await response.json();
-        } catch (error) {
-            console.error('Error loading users:', error);
-            return [];
-        }
+    getUsers() {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', '../data/user.json', true);
+            xhr.onload = function() {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+                        resolve(data);
+                    } catch (error) {
+                        console.error('Error parsing user data:', error);
+                        resolve([]);
+                    }
+                } else {
+                    console.error('Failed to load users');
+                    resolve([]);
+                }
+            };
+            xhr.onerror = function() {
+                console.error('Error loading users');
+                resolve([]);
+            };
+            xhr.send();
+        });
     },
 
-    async checkUsername(username) {
-        const users = await this.getUsers();
-        return !users.some(user => user.username === username);
+    checkUsername(username) {
+        return new Promise((resolve, reject) => {
+            this.getUsers().then(users => {
+                const available = !users.some(user => user.username === username);
+                resolve(available);
+            });
+        });
     },
 
-    async registerUser(userData) {
-        // In a real app, this would POST to a server
-        console.log('Registering user:', userData);
+    registerUser(userData) {
         return new Promise(resolve => {
+            // Simulate server request with timeout
+            console.log('Registering user:', userData);
             setTimeout(() => {
                 resolve({ success: true });
             }, 1000);

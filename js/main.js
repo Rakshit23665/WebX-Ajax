@@ -10,17 +10,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const registrationMessage = document.getElementById('registrationMessage');
 
     // College suggestions
-    collegeInput.addEventListener('focus', async function() {
-        const colleges = await api.getColleges();
-        showSuggestions(colleges);
+    collegeInput.addEventListener('focus', function() {
+        api.getColleges().then(colleges => {
+            showSuggestions(colleges);
+        });
     });
 
-    collegeInput.addEventListener('input', async function() {
-        const colleges = await api.getColleges();
-        const filtered = colleges.filter(c => 
-            c.toLowerCase().includes(this.value.toLowerCase())
-        );
-        showSuggestions(filtered);
+    collegeInput.addEventListener('input', function() {
+        api.getColleges().then(colleges => {
+            const filtered = colleges.filter(c => 
+                c.toLowerCase().includes(this.value.toLowerCase())
+            );
+            showSuggestions(filtered);
+        });
     });
 
     function showSuggestions(colleges) {
@@ -50,12 +52,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Username validation
-    usernameInput.addEventListener('blur', async function() {
+    usernameInput.addEventListener('blur', function() {
         const username = this.value.trim();
         if (!username) return;
         
-        const available = await api.checkUsername(username);
-        usernameError.textContent = available ? '' : 'Username already taken';
+        api.checkUsername(username).then(available => {
+            usernameError.textContent = available ? '' : 'Username already taken';
+        });
     });
 
     // Password match check
@@ -65,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Form submission
-    registrationForm.addEventListener('submit', async function(e) {
+    registrationForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
         if (passwordInput.value !== confirmPasswordInput.value) {
@@ -75,20 +78,18 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (usernameError.textContent) return;
         
-        try {
-            const result = await api.registerUser({
-                name: document.getElementById('name').value,
-                college: collegeInput.value,
-                username: usernameInput.value,
-                password: passwordInput.value
-            });
-            
+        api.registerUser({
+            name: document.getElementById('name').value,
+            college: collegeInput.value,
+            username: usernameInput.value,
+            password: passwordInput.value
+        }).then(result => {
             registrationMessage.textContent = 'Successfully Registered!';
             registrationMessage.className = 'message success';
             registrationForm.reset();
-        } catch (error) {
+        }).catch(error => {
             registrationMessage.textContent = 'Registration failed';
             registrationMessage.className = 'message error';
-        }
+        });
     });
-}); 
+});
